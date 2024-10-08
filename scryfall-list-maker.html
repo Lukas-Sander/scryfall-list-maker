@@ -117,6 +117,7 @@
         </p>
     </form>
 
+    <p style="color: darkgoldenrod;" id="status"></p>
     <p id="card-count"></p>
 
     <h2>Card List</h2>
@@ -135,11 +136,14 @@
         const cardListTextarea = document.getElementById('card-list');
         const cardListFrontTextarea = document.getElementById('card-list-front');
         const cardCountDisplay = document.getElementById('card-count');
+        const statusDisplay = document.getElementById('status');
+        let pages = 1;
 
         // Clear previous results
         cardListTextarea.value = '';
         cardListFrontTextarea.value = '';
         cardCountDisplay.textContent = '';
+        statusDisplay.textContent = 'Fetching page '+pages+'...';
 
         // Fetch cards from Scryfall API
         fetch(apiUrl)
@@ -158,8 +162,9 @@
 
                 // If there are multiple pages, fetch the rest
                 if (data.has_more) {
-                    fetchRemainingPages(data.next_page, cardNames, cardListTextarea, cardListFrontTextarea, cardCountDisplay);
+                    fetchRemainingPages(data.next_page, cardNames, cardListTextarea, cardListFrontTextarea, cardCountDisplay, pages, statusDisplay);
                 } else {
+                    statusDisplay.textContent = pages+' pages queried in total.';
                     updateCardLists(cardNames, cardListTextarea, cardListFrontTextarea, cardCountDisplay);
                 }
             })
@@ -168,7 +173,10 @@
             });
     });
 
-    function fetchRemainingPages(nextPageUrl, cardNames, cardListTextarea, cardListFrontTextarea, cardCountDisplay) {
+    function fetchRemainingPages(nextPageUrl, cardNames, cardListTextarea, cardListFrontTextarea, cardCountDisplay, pages, statusDisplay) {
+        pages++;
+        statusDisplay.textContent = 'Fetching page '+pages+'...';
+
         fetch(nextPageUrl)
             .then(response => response.json())
             .then(data => {
@@ -178,9 +186,9 @@
 
                 // Check for more pages and fetch if necessary
                 if (data.has_more) {
-                    fetchRemainingPages(data.next_page, cardNames, cardListTextarea, cardListFrontTextarea, cardCountDisplay);
+                    fetchRemainingPages(data.next_page, cardNames, cardListTextarea, cardListFrontTextarea, cardCountDisplay, pages, statusDisplay);
                 } else {
-                    updateCardLists(cardNames, cardListTextarea, cardListFrontTextarea, cardCountDisplay);
+                    updateCardLists(cardNames, cardListTextarea, cardListFrontTextarea, cardCountDisplay, pages, statusDisplay);
                 }
             })
             .catch(err => {
@@ -188,9 +196,11 @@
             });
     }
 
-    function updateCardLists(cardNames, cardListTextarea, cardListFrontTextarea, cardCountDisplay) {
+    function updateCardLists(cardNames, cardListTextarea, cardListFrontTextarea, cardCountDisplay, pages, statusDisplay) {
         // Display the total card count
         cardCountDisplay.textContent = `Found ${cardNames.length} cards.`;
+
+        statusDisplay.textContent = pages+' pages queried in total.';
 
         // Update the main card list
         cardListTextarea.value = cardNames.join('\n');
