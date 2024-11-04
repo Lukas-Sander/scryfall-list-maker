@@ -165,7 +165,7 @@
                     fetchRemainingPages(data.next_page, cardNames, cardListTextarea, cardListFrontTextarea, cardCountDisplay, pages, statusDisplay);
                 } else {
                     statusDisplay.textContent = pages+' pages queried in total.';
-                    updateCardLists(cardNames, cardListTextarea, cardListFrontTextarea, cardCountDisplay);
+                    updateCardLists(cardNames, cardListTextarea, cardListFrontTextarea, cardCountDisplay, pages, statusDisplay);
                 }
             })
             .catch(err => {
